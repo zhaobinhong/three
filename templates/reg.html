@@ -1,29 +1,131 @@
 {% include 'header.html' %}
 
-<div id="code"></div>
 
+<div id="code">
+    <div class="box">
+        <div class="login-switch">
+            <i class="icon iconfont icon-saomadenglu01 quick" style="font-size: 67px"></i>
+            <i class="icon iconfont icon-pclogin static" style="font-size: 50px"></i>
+        </div>
+        <div id="lg_title" class="login-title">手机扫码，安全注册！</div>
+        <br>
+        <div id="content">
+            <img class="QR" src="{{ qrcode(data, box_size=5) }}" alt="">
+
+            <div class="qrcode-desc" data-spm="25847036">
+
+                <p><i class="icon iconfont icon-saoyisao"></i><span class="ft-gray">扫一扫注册</span></p>
+
+            </div>
+            <div class="login-links">
+
+                <a href="/api/passport/signin/" class="register" target="_parent"
+                   tabindex="7">到登录</a>
+
+            </div>
+        </div>
+        <div id="quick_content">
+            <div class="field ph-hide username-field ">
+
+                <label for="TPL_username_1"><i class="icon-user" title="会员名"></i></label>
+                <input type="text" name="TPL_username" id="TPL_username_1" class="login-text J_UserName" value=""
+                       maxlength="32" tabindex="1" aria-label="账号" placeholder="账号">
+            </div>
+            <div class="field ph-hide username-field ">
+
+                <label for="TPL_username_1"><i class="icon-lock" title="密码"></i></label>
+                <input type="text" name="TPL_username" id="TPL_username_1" class="login-text J_UserName" value=""
+                       maxlength="32" tabindex="1" aria-label="密码" placeholder="密码">
+            </div>
+            <div class="field ph-hide username-field ">
+                <label for="TPL_username_1"><i class="icon-lock" title="密码"></i></label>
+                <input type="text" name="TPL_username" id="TPL_username_1" class="login-text J_UserName" value=""
+                       maxlength="32" tabindex="1" aria-label="重复密码" placeholder="重复密码">
+            </div>
+
+            <button type="submit" class="J_Submit sub" tabindex="3" id="J_SubmitStatic" data-ing="稍等...">注 册</button>
+            <div class="login-links">
+
+                <a href="/api/passport/signin/" class="register" target="_parent"
+                   tabindex="7">到登录</a>
+
+            </div>
+        </div>
+
+
+    </div>
+    {#    <div id="qrtxt">#}
+    {#        <pre>{{ data }}</pre>#}
+    {#    </div>#}
+
+</div>
+{#<pre>#}
+{#    <div id="message" style="width: 100%;display: block;margin: 0 auto;overflow-x: scroll;padding-top: 2em;"></div>#}
+{#</pre>#}
+
+<div id="detail">
+    <div class="tit"><i class="close icon-off"></i></div>
+    <div id="text">
+        <pre id="predata">
+	    {{ data }}
+
+        </pre>
+    </div>
+
+</div>
 
 
 <script type="text/javascript">
 
+    var detail = document.getElementById("predata");
+    {#    $("#t1").click(function () {#}
+    {##}
+    {#        detail.innerHTML += "<br/>1111"#}
+    {#        popWin("detail");#}
+    {##}
+    {#    });#}
 
-    $(function () {
+    window.onload = function () {
+        var static = document.getElementsByClassName('static')[0];
+        var quick = document.getElementsByClassName("quick")[0];
+        var content = document.getElementById("content");
+        var quick_content = document.getElementById("quick_content");
+        var lg_title = document.getElementById("lg_title");
+        static.onclick = function () {
+            this.style.display = "none";
+            quick.style.display = "block";
+            quick_content.style.display = "block";
+            content.style.display = "none";
+            lg_title.innerHTML = "欢迎注册！"
+        };
+        quick.onclick = function () {
+            this.style.display = "none";
+            static.style.display = "block";
+            quick_content.style.display = "none";
+            content.style.display = "block";
+            lg_title.innerHTML = "手机扫码，安全注册！"
+        };
+    }
 
-        var data = '{{  data | safe }}';
-        $('#code').qrcode(data);
-    })
 
     function quire() {
         $.ajax({
             url: "/services/validate/{{ req_id }}/", async: false, success: function (result) {
                 console.log(result);
-                if (result['errors'] == 0) {
-                    $('#code').html('注册成功')
+                if (result['errors'] == 0 && result['status'] == 1) {
+                    var log = result['log'];
+
+                    detail.innerHTML += '<br/>注册成功，注册时间：' + log[0]['datatime'] + '，<br/>req_id：' + log[0]['req_id'] + '，<br/>密文：' + log[0]['cipher'] + '，<br/>明文：' + log[0]['clear'] + '<br/>签名密文：<br/>' + result['base'] + '<br/>签名明文：<br/>' + result['basejson'];
+
+                    popWin("detail");
+                    window.clearInterval(timer)
+                } else if (result['errors'] == 1) {
+                    $('#code').html('注册失败')
                 }
             }
         })
     }
-    setInterval("quire()", 5000);
+        timer = setInterval("quire()", 5000);
 </script>
 
 {% include 'footer.html' %}

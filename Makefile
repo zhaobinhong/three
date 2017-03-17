@@ -41,7 +41,6 @@ clean-build:
 	find . -name '*.egg-info' -exec rm -fr {} +
 	find . -name '*.egg' -exec rm -f {} +
 	find . -name '*.log' -exec rm -f {} +
-	find . -name '*.sql' -exec rm -f {} +
 
 clean-others:
 	find . -name 'Thumbs.db' -exec rm -f {} \;
