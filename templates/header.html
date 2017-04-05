@@ -10,6 +10,7 @@
     <script type="text/javascript" src="/static/js/jquery-1.7.2.min.js"></script>
     <script type="text/javascript" src="/static/js/jquery.qrcode.min.js"></script>
     <script type="text/javascript" src="/static/js/tc.all.js"></script>
+    <script type="text/javascript" src="/static/js/jsonindent.js"></script>
 
     <link rel="stylesheet" href="/static/fonts/demo.css">
     <link rel="stylesheet" href="/static/fonts/iconfont.css">
@@ -21,6 +22,99 @@
 {#<header>#}
 {#    <h1>{{ title }}</h1>#}
 {#</header>#}
+
+<header>
+
+    <div class="pull-left pull-left">
+        <ul class="process">
+            <li id="one"
+                style="width:74px;background: url('/static/img/1on.png') no-repeat;background-size: 100%;"></li>
+            <li class="♥"
+                style="background: url('/static/img/line_off.png') no-repeat;background-size: 100%;-ms-background-position-y: 40px;background-position-y: 26px;"></li>
+            <li id="two" style="background: url('/static/img/2off.png') no-repeat;background-size: 100%;"></li>
+            <li class="♥"
+                style="background: url('/static/img/line_off.png') no-repeat;background-size: 100%;-ms-background-position-y: 40px;background-position-y: 26px;"></li>
+            <li id="three" style="background: url('/static/img/3off.png') no-repeat;background-size: 100%;"></li>
+            <li class="♥"
+                style="background: url('/static/img/line_off.png') no-repeat;background-size: 100%;-ms-background-position-y: 40px;background-position-y: 26px;"></li>
+            <li id="four" style="background: url('/static/img/4off.png') no-repeat;background-size: 100%;"></li>
+        </ul>
+    </div>
+    <div class="pull-right bac">
+        <h3>互兆代登录测试版</h3>
+    </div>
+
+</header>
+
+<div id="theBox">
+    <div class="detail χ show" id="χ">
+        <div class="tit"><span class="detailTit">扫描二维码</span><i class="close pull-right icon-off"></i></div>
+        <div class="text">
+        <pre class="predata">二维码数据：
+{{ data }}
+-------------------------
+appkey：商户标识
+name：商户名称(豆豆网)
+req_id：每次请求的随机标识
+uri：请求地址
+type：请求类型（注册、登录）
+        </pre>
+        </div>
+
+    </div>
+    <div class="detail ψ show " id="ψ">
+        <div class="tit"><span class="detailTit">数据签名</span><i class="close icon-off"></i></div>
+        <div class="text">
+        <pre class="predata">
+
+        </pre>
+        </div>
+
+    </div>
+    <div class="detail  ϑ show" id="ϑ">
+        <div class="tit"><span class="detailTit">数据验签</span><i class="close icon-off"></i></div>
+        <div class="text">
+        <pre class="predata">
+
+        </pre>
+        </div>
+
+    </div>
+    <div class="detail ϒ show " id="ϒ">
+        <div class="tit"><span class="detailTit">获取信息</span><i class="close icon-off"></i></div>
+        <div class="text">
+        <pre class="predata">
+
+        </pre>
+        </div>
+
+    </div>
+</div>
+
+<script type="text/javascript">
+    var data={{ data|safe }}
+
+    var n='-------------------------<br/>'+
+        'appkey：商户标识<br/>'+
+        'name：商户名称(豆豆网)<br/>'+
+        'req_id：每次请求的随机标识<br/>'+
+        'uri：请求地址<br/>'+
+        'type：请求类型（注册、登录）';
+    var predata0=document.getElementsByClassName("predata")[0]
+    predata0.innerHTML="二维码数据：<br>"+formatJson(JSON.stringify(data))+"<br/>"+n;
+
+    var details = document.getElementsByClassName("detail");
+    var closes = document.getElementsByClassName("close");
+    for (var i = 0; i < details.length; i++) {
+        closes[i].i = i;
+        closes[i].onclick = function () {
+            var str = details[this.i].className;
+            str = str.substr(0, str.indexOf('show'));
+            details[this.i].className = str;
+        }
+    }
+
+</script>
 
 {#<nav>#}
 {#    <span><a title="主页" href="/">home</a></span>#}

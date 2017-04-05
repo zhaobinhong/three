@@ -77,7 +77,8 @@
 </div>
 
 <script type="text/javascript">
-    var detail = document.getElementById("predata");
+    var detail = document.getElementById("predata"), tow = document.getElementById("two"), three = document.getElementById("three"), four = document.getElementById("four"), predatas = document.getElementsByClassName("predata"), steps = document.getElementsByClassName("♥");
+
 
     window.onload = function () {
         var static = document.getElementsByClassName('static')[0];
@@ -105,12 +106,39 @@
         $.ajax({
             url: "/services/validate/{{ req_id }}/", async: false, success: function (result) {
                 console.log(result);
+                {#                console.log(details[0])#}
                 if (result['errors'] == 0 && result['status'] == 2) {
                     var log = result['log'];
 
-                    detail.innerHTML += '登录成功，登录时间：' + log[0]['datatime'] + '，<br/>req_id：' + log[0]['req_id'] + '，<br/>密文：<br/>' + log[0]['cipher'] + '，<br/>明文：<br/>' + log[0]['clear'] + '<br/>签名密文：<br/>' + result['base'] + '<br/>签名明文：<br/>' + result['basejson'];
+                    tow.style.backgroundImage = "url(/static/img/2on.png)";
+                    tow.style.width = "62px";
+                    steps[0].style.backgroundImage = "url('/static/img/lline_on.png')"
 
-                    popWin("detail");
+
+                    predatas[1].innerHTML = '数据密文：<br/>' + log[0]['cipher'] + '，<br/>数据明文：<br/>' + log[0]['clear']+'<br/>-------------------------<br/>'+'appkey：商户标识<br>'+'name：商户名称（豆豆网）<br>'+'req_id：每次请求的随机标识<br>'+'uri：请求地址<br>'+'type：请求类型（注册、登录）<br>'+'open_id：用户对商户的派生码';
+
+
+
+
+
+                    window.setTimeout(function () {
+                        three.style.backgroundImage = "url(/static/img/3on.png)";
+                        three.style.width = "62px";
+                        steps[1].style.backgroundImage = "url('/static/img/lline_on.png')"
+                        predatas[2].innerHTML = '签名密文：<br/>' + result['base'] + '<br/>签名明文：<br/>' + result['basejson']+'<br/>-------------------------<br/>'+'startDate：验签开始时间<br>'+'endDate：验签结束时间<br>'+'serialNo：证书号<br>'+'source：验签源文<br>'+'subject：DN<br>'+'issuer：发证机构';
+                    }, 1000);
+                    window.setTimeout(function () {
+                        four.style.backgroundImage = "url(/static/img/4on.png)";
+                        four.style.width = "62px";
+                        steps[2].style.backgroundImage = "url('/static/img/lline_on.png')";
+                        var text=result['basejson'];
+                        var obj=eval("("+text+")");
+                        predatas[3].innerHTML = '登录成功，登录时间：' + log[0]['datatime'] + '，<br/>req_id：' + log[0]['req_id']+'<br/>DN：<br>'+obj.subject;
+                    }, 2000);
+
+                    {#                    detail.innerHTML += '登录成功，登录时间：' + log[0]['datatime'] + '，<br/>req_id：' + log[0]['req_id'] + '，<br/>密文：<br/>' + log[0]['cipher'] + '，<br/>明文：<br/>' + log[0]['clear'] + '<br/>签名密文：<br/>' + result['base'] + '<br/>签名明文：<br/>' + result['basejson'];#}
+
+                    {#                    popWin("detail");#}
                     window.clearInterval(timer)
                 } else if (result['errors'] == 1) {
                     $('#code').html('登录失败')
@@ -118,7 +146,7 @@
             }
         })
     }
-        var timer=setInterval("quire()", 5000);
+    var timer = setInterval("quire()", 5000);
 </script>
 
 {% include 'footer.html' %}

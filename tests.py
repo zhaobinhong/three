@@ -104,10 +104,17 @@ class FlaskrTestCase(unittest.TestCase):
 
     # 存data
     def test_reqdata(self):
-        data = '{"data": {"appkey": "appkey","uri": "/api/passport/signin/","req_id": "d49a49c0093011e78261480fcf59a86e"},"req_id": "d49a49c0093011e78261480fcf59a86e"}'
+        data = '{"data": "lklkl","req_id": "d49a49c0093011e78261480fcf59a86e"}'
         status = self.app.post('/service/requestsreq/', data=data)
+
+        aa = requests.post("http://10.7.7.47:3000/service/requestsreq/", data=data)
+
+        print aa.content
+        print aa.status_code
         print status.get_data()
+        print status.status_code
         assert status.status_code == 200
+
 
 
 if __name__ == '__main__':

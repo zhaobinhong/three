@@ -102,7 +102,7 @@ class Orders(db.Model):
 
 
 # appkey 配置
-appkey = 'appkey'
+appkey = 'fgsinn1664821488352795'
 
 # 验签地址
 VERIFY_GATEWAY = 'http://10.7.7.22:9090'
@@ -453,25 +453,28 @@ def orders():
 
 
 @app.route('/api/passport/signin/')
-def qr(name=None):
+def qrlogin(name=None):
     title = u'二维码登录'
     data = {
         "type": "signin",
         "data": {
+            "name":"豆豆网",
             "req_id": sum(),
             "appkey": appkey,
             "uri": "/api/passport/signin/"
         }
     }
+
     return render_template('qrlogin.html', name=name, title=title, data=json.dumps(data, indent=2),
                            req_id=data['data']['req_id'])
 
 
 @app.route('/')
-def reg():
+def qrsignup():
     data = {
         "type": "signup",
         "data": {
+            "name":"豆豆网",
             "req_id": sum(),
             "appkey": appkey,
             "uri": "/api/passport/signup/"

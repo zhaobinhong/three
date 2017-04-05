@@ -10,7 +10,8 @@ html, body {
 }
 
 body {
-    max-width: 900px;
+    width: 100%;
+    /*max-width: 900px;*/
     /*width: 600px;*/
     margin: 2em auto;
     padding: 0 2em;
@@ -71,7 +72,7 @@ article a:hover {
 }
 
 #code {
-    margin-top: 10rem;
+    margin-top: 4rem;
     text-align: center;
 }
 
@@ -1120,7 +1121,9 @@ table tr:nth-child(5) {
     padding: 25px 25px 23px;
     color: #6c6c6c;
     background: #fff;
-    position: relative;
+    /*position: relative;*/
+    position: absolute;
+    right: 2%;
     margin: 0 auto;
 }
 
@@ -1263,7 +1266,7 @@ body {
 }
 
 html {
-    overflow: hidden;
+    overflow: auto;
 }
 
 .login-links {
@@ -1300,12 +1303,12 @@ i {
     font-style: normal;
 }
 
-#detail {
+#detail, .detail {
     background-image: url("/static/img/94.png");
     background-repeat: repeat-y;
     background-size: 100%;
     position: absolute;
-    max-width: 960px;
+    max-width: 340px;
     border-radius: 5px;
     /*height: 217px;*/
     border: 1px solid #ccc;
@@ -1316,28 +1319,84 @@ i {
 
 }
 
-#detail #text {
-    max-height: 465px;
+#detail #text, .detail .text {
+    width: 338px;
+    height:  237px;
+    max-height: 237px;
     overflow: hidden;
     Overflow-y: scroll
 }
 
-#detail .tit {
+#detail .tit, .detail .tit {
     background: #e3e0e3;
     height: 33px;
     cursor: move;
-    display: flex;
+    /*display: flex;*/
 }
 
-#detail .tit i {
+#detail .tit i, .detail .tit i {
     float: right;
     line-height: 33px;
     padding: 0 8px;
     cursor: default;
 }
 
-#detail pre {
+#detail pre, .detail pre {
+    min-height: 237px;
     background: transparent;
     color: #00ff0c;
 
 }
+
+header {
+    height: 114px;
+    overflow: hidden;
+    color: #e54a0d;
+    border-bottom: none;
+}
+
+header div.bac {
+    height: 136px;
+    float: right;
+    margin-right: 1%;
+    padding-right: 20px;
+    text-align: right;
+    width: 326px;
+    background-image: url("/static/img/1245.png");
+    background-size: 100%;
+    background-repeat: no-repeat;
+}
+
+header div.bac h3 {
+    line-height: 22px;
+}
+
+.process li {
+    float: left;
+    width: 54px;
+    height: 136px;
+}
+
+.♥ {
+    margin: 0px 10px 0px;
+}
+
+.χ, .ψ, .ϑ, .ϒ {
+
+}
+
+.ψ, .ϒ {
+    left: 32%;
+}
+
+.ϑ, .ϒ {
+    margin-top: 2em;
+    top: 60%;
+}
+
+.detailTit {
+    margin: 8px 0px 0px 10px;
+    position: absolute;
+    color: #373737;
+}
+
