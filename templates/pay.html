@@ -1,8 +1,6 @@
 {% include 'header.html' %}
 
-<div id="code"><img src="{{ qrcode(data, box_size=4) }}" alt="">
-    <div id="qrtxt"><pre>{{ data }}</pre></div>
-</div>
+<div id="code"></div>
 
 <button id="butSub" class="butSub">发送支付请求</button>
 
@@ -11,6 +9,12 @@
 
 
     $(function () {
+
+        var data = '{{ data| safe  }}';
+        da = eval("'" + data + "'");
+        console.log(da)
+
+        $('#code').qrcode(da);
 
 
         $('.butSub').click(function () {

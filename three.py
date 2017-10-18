@@ -2,21 +2,16 @@
 import json
 import random
 import sqlite3
-import datetime
-import base64
 
-# import QRcode as QRcode
 import requests
 from flask import Flask, jsonify
 from flask import render_template
 from flask import request
-from flask_qrcode import QRcode
 # from flask_migrate import Migrate, MigrateCommand
 # from flask_script import Manager
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-qrcode = QRcode(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config.setdefault('SQLALCHEMY_TRACK_MODIFICATIONS', True)
 db = SQLAlchemy(app)
@@ -60,17 +55,6 @@ class Requests(db.Model):
     owner = db.relationship('Sign', backref=db.backref('requests', lazy='dynamic'))
 
 
-class Reqlog(db.Model):
-    __tablename__ = 'reqlog'
-    id = db.Column(db.Integer, primary_key=True, index=True, autoincrement=True)
-    req_id = db.Column(db.String, default='')
-    datatime = db.Column(db.String, default='')
-    cipher = db.Column(db.String, default='')
-    clear = db.Column(db.String, default='')
-    base = db.Column(db.String, default='')
-    basejson = db.Column(db.String, default='')
-
-
 # ODERTYPE = (
 
 
@@ -102,7 +86,7 @@ class Orders(db.Model):
 
 
 # appkey 配置
-appkey = 'fgsinn1664821488352795'
+appkey = 'appkey'
 
 # 验签地址
 VERIFY_GATEWAY = 'http://10.7.7.22:9090'
@@ -116,8 +100,7 @@ def push():
         'data': {
             "req_id": sum(),
             "appkey": appkey,
-            "openid": '1664821488352795',
-            "uri": "/api/passport/payment/",
+            "uri": "/api/passport/receive/",
             "orders": {
                 "goods": {
                     "title": "袜子",
@@ -137,32 +120,26 @@ def push():
             }
         }
     }
-    # print request.form['data']
-    data = json.loads(request.form['data'])
+    # data = json.dumps(json.loads(request.data))
     # print data
-    resp = requests.post(url='http://10.7.7.22/api/passport/push/', json=data)
+    resp = requests.post(url='http://10.7.7.22/api/passport/push/', json=request.form['data'])
     return resp.content
 
 
 def sum():
-    import uuid
-    return uuid.uuid1().hex
+    import hashlib
+    m = hashlib.md5()
+    a = random.uniform(10, 20)
+    a = '%d' % a
+    m.update(a)
+
+    return m.hexdigest()
 
 
-def openID():
-    try:
-        openid = Sign.query.order_by(Sign.id.desc()).first().openid
-    except Exception as e:
-        openid = ''
-    return openid
-
-
-def orderID():
-    try:
-        orderid = Orders.query.order_by(Orders.id.desc()).first().order_num
-    except Exception as e:
-        orderid = ''
-    return orderid
+try:
+    openID = Sign.query.order_by(Sign.id.desc()).first().openid
+except Exception as e:
+    openID = ''
 
 
 # 回调fun
@@ -174,10 +151,6 @@ def get_app(action):
     # request.stream
 
     sign = resp.json()
-    # print  request.data
-    base = base64.b64encode(request.data)
-    # print base
-
     # print sign
 
     try:
@@ -195,16 +168,12 @@ def get_app(action):
         if action == 'signin':
             if key == appkey:
                 try:
-                    ow = Sign.query.filter_by(openid=data['data']['openid']).first()
-                    s1 = Requests(req_id=data['data']['req_id'], status=2, owner=ow)
-
-                    time = datetime.datetime.now().strftime('%Y-%m-%d')
-                    log = Reqlog(req_id=data['data']['req_id'], datatime=time, clear=json.dumps(data, indent=2),
-                                 cipher=str(sign.get('source')), base=str(base),
-                                 basejson=json.dumps(json.loads(resp.content), indent=2))
+                    st = Requests.query.filter_by(openid=data['data']['openid']).first()
+                    s1 = Requests(req_id=data['data']['req_id'], openid=data['data']['openid'], status=2,
+                                  owner=st.owner)
+                    # st.status = 2
 
                     db.session.add(s1)
-                    db.session.add(log)
                     db.session.commit()
 
                     return jsonify({
@@ -216,6 +185,7 @@ def get_app(action):
                         "errors": 1,
                         "detail": "数据写入失败" + e.message
                     })
+
             else:
                 return jsonify({
                     "errors": 1,
@@ -233,20 +203,12 @@ def get_app(action):
                         appkey=data['data']['appkey']
                     )
 
-                    time = datetime.datetime.now().strftime('%Y-%m-%d')
-
                     status = Requests(req_id=data['data']['req_id'], status=1, owner=owner)
 
-                    log = Reqlog(req_id=data['data']['req_id'], datatime=time, clear=json.dumps(data, indent=2),
-                                 cipher=str(sign.get('source')), base=str(base),
-                                 basejson=json.dumps(json.loads(resp.content), indent=2))
-
                     db.session.add(owner)
-                    db.session.add(status)
-                    db.session.add(log)
-                    db.session.commit()
 
-                    # print log.basejson
+                    db.session.add(status)
+                    db.session.commit()
 
                     return jsonify({
                         "errors": 0,
@@ -264,29 +226,17 @@ def get_app(action):
                 })
         elif action == 'payment':
             if key == appkey:
-                # orIs = data['data']['errors']
-                # if (orIs == False):
-                try:
-                    print data['data']['orderid']
-                    oder = Orders.query.filter_by(order_num=data['data']['orderid']).first()
-                    oder.g_type = u'已支付'
-                    db.session.add(oder)
-                    db.session.commit()
-                except Exception as e:
+                orIs = data['data']['errors']
+                if (orIs == False):
+                    return jsonify({
+                        "errors": 0,
+                        "detail": "支付成功"
+                    })
+                else:
                     return jsonify({
                         "errors": 1,
-                        "detail": "数据失败" + e.message
+                        "detail": "支付失败"
                     })
-
-                return jsonify({
-                    "errors": 0,
-                    "detail": "完成支付"
-                })
-                # else:
-                #     return jsonify({
-                #         "errors": 1,
-                #         "detail": "支付失败"
-                #     })
 
             else:
                 return jsonify({
@@ -295,22 +245,9 @@ def get_app(action):
                 })
         elif action == 'receive':
             if key == appkey:
-                try:
-                    print data['data']['orderid']
-                    oder = Orders.query.filter_by(order_num=data['data']['orderid']).first()
-                    oder.g_type = u'已收货'
-
-                    db.session.add(oder)
-                    db.session.commit()
-                except Exception as e:
-                    return jsonify({
-                        "errors": 1,
-                        "detail": "没有订单数据，请先支付 " + e.message
-                    })
-
                 return jsonify({
                     "errors": 0,
-                    "detail": "完成收货"
+                    "detail": "收货成功"
                 })
             else:
                 return jsonify({
@@ -319,20 +256,9 @@ def get_app(action):
                 })
         elif action == 'refunds':
             if key == appkey:
-                try:
-                    oder = Orders.query.filter_by(order_num=data['data']['orderid']).first()
-                    oder.g_type = u'已退货'
-
-                    db.session.add(oder)
-                    db.session.commit()
-                except Exception as e:
-                    return jsonify({
-                        "errors": 1,
-                        "detail": "没有订单数据，请先支付 " + e.message
-                    })
                 return jsonify({
                     "errors": 0,
-                    "detail": "完成退货"
+                    "detail": "退货成功"
                 })
             else:
                 return jsonify({
@@ -346,11 +272,11 @@ def get_app(action):
             })
 
 
-# @app.route('/')
-# def hello_world():
-#     title = u'主页'
-#     data = r"http://www.bankeys.com"
-#     return render_template('index.html', title=title, data=data)
+@app.route('/')
+def hello_world():
+    title = u'主页'
+    data = r"http://www.bankeys.com"
+    return render_template('index.html', title=title, data=data)
 
 
 # 轮询接口（用户状态）fsagdsfg2356532
@@ -363,21 +289,10 @@ def validate(req_id):
     if st:
         # print reqlist.is_ok
         if st.status > 0:
-            try:
-                log = Reqlog.query.filter_by(req_id=req_id).first()
-                print log.req_id, log.datatime, log.cipher, log.clear
-                jsdata = [{"req_id": log.req_id, "datatime": log.datatime, "cipher": log.cipher,
-                           "clear": log.clear}]
-
-            except Exception as e:
-                print e.message
             status = jsonify({
                 "errors": 0,
                 "detail": "ok",
-                "status": st.status,
-                "log": jsdata,
-                "base": log.base,
-                "basejson": log.basejson
+                "status": st.status
             })
         else:
             status = jsonify({
@@ -387,42 +302,17 @@ def validate(req_id):
             })
     else:
         status = jsonify({
-            "errors": -1,
+            "errors": 1,
             "detail": "没有数据"
         })
     return status
-
-
-@app.route('/service/requestsreq/', methods=['POST'])
-def requestsreq():
-    # print request.data
-    data = eval(request.data)
-    # print data["data"]
-
-    if data:
-        req_id = data['req_id']
-        data = data['data']
-        log = Reqlog(req_id=req_id, basejson=str(data))
-        db.session.add(log)
-        db.session.commit()
-
-        return jsonify({
-            "errors": 0,
-            "detail": "ok"
-        })
-    else:
-        return jsonify({
-            "errors": 1,
-            "detail": "request error"
-        })
 
 
 # 商品回调
 @app.route('/services/product/<pk>')
 def product(pk):
     good = Goods.query.filter_by(id=pk).first()
-    print
-    jsonify({
+    print jsonify({
         'id': good.id,
         'g_name': good.g_name,
         'g_price': good.g_price
@@ -453,51 +343,48 @@ def orders():
 
 
 @app.route('/api/passport/signin/')
-def qrlogin(name=None):
+def qr(name=None):
     title = u'二维码登录'
     data = {
         "type": "signin",
         "data": {
-            "name":"豆豆网",
             "req_id": sum(),
+            "openid": openID,
             "appkey": appkey,
             "uri": "/api/passport/signin/"
         }
     }
-
-    return render_template('qrlogin.html', name=name, title=title, data=json.dumps(data, indent=2),
-                           req_id=data['data']['req_id'])
+    return render_template('qrlogin.html', name=name, title=title, data=json.dumps(data), req_id=data['data']['req_id'])
 
 
-@app.route('/')
-def qrsignup():
+@app.route('/api/passport/signup/')
+def reg():
     data = {
         "type": "signup",
         "data": {
-            "name":"豆豆网",
             "req_id": sum(),
             "appkey": appkey,
             "uri": "/api/passport/signup/"
         }
     }
     title = u'注册'
-    return render_template('reg.html', title=title, data=json.dumps(data, indent=2), req_id=data['data']['req_id'])
+    return render_template('reg.html', title=title, data=json.dumps(data), req_id=data['data']['req_id'])
 
 
-@app.route('/api/passport/list/')
-def goodList():
-    title = u'商品列表'
-    data = {}
-    goods = Goods.query.all()
-    for good in goods:
-        i = {
-            'id': good.id,
-            'g_name': good.g_name,
-            'g_price': good.g_price
-        }
-        data[good.id] = i
-
-    return render_template('goodslist.html', title=title, data=json.dumps(data))
+# @app.route('/api/passport/list/')
+# def goodList():
+#     title = u'商品列表'
+#     data = {}
+#     goods = Goods.query.all()
+#     for good in goods:
+#         i = {
+#             'id': good.id,
+#             'g_name': good.g_name,
+#             'g_price': good.g_price
+#         }
+#         data[good.id] = i
+#
+#     return render_template('goodslist.html', title=title, data=json.dumps(data))
 
 
 @app.route('/api/passport/users/')
@@ -547,38 +434,26 @@ def order():
 @app.route('/api/passport/payment/')
 def pay():
     title = u'支付'
-    loris = u'姓名'
-
+    loris = 'loris'
+    # button 推
     data = {
-        'type': 'payment',
-        'data': {
-            'req_id': sum(),
-            'openid': openID(),
-            'appkey': appkey,
-            'uri': '/api/passport/payment/',
+        "type": "payment",
+        "data": {
+            "req_id": sum(),
+            "openid": openID,
+            "appkey": appkey,
+            "uri": "/api/passport/payment/",
             'receive': loris,
-            'address': u'北京朝阳区',
             'orderid': str(random.randint(1, 9999999999)),
             'goods': {
                 'title': 'iphone7',
                 'amount': '6000.00',
             }
+
         }
     }
-    try:
-        orders = Orders(order_num=data['data']['orderid'],
-                        drawee=data['data']['receive'],
-                        address=data['data']['address'],
-                        g_name=data['data']['goods']['title'],
-                        g_price=data['data']['goods']['amount'],
-                        g_type=u'未支付')
 
-        db.session.add(orders)
-        db.session.commit()
-    except Exception as e:
-        pass
-
-    return render_template('pay.html', title=title, data=json.dumps(data, indent=2))
+    return render_template('pay.html', title=title, data=json.dumps(data))
 
 
 @app.route('/api/passport/receive/')
@@ -588,7 +463,7 @@ def tgoods():
         'type': 'receive',
         'data': {
             "req_id": sum(),
-            "openid": openID(),
+            "openid": openID,
             "appkey": appkey,
             "uri": "/api/passport/receive/",
             "orders": {
@@ -602,7 +477,7 @@ def tgoods():
                     "mobile": "18918989110",
                     "address": "北京",
                 },
-                "orderid": orderID(),
+                "orderid": "113030330",
                 "created": "2017-02-01",
                 "fee": "550.00",
                 "discount": "300.00",
@@ -620,9 +495,9 @@ def rgoods():
         'type': 'refunds',
         'data': {
             "req_id": sum(),
-            "openid": openID(),
+            "openid": openID,
             "appkey": appkey,
-            "uri": "/api/passport/refunds/",
+            "uri": "/api/passport/receive/",
             "orders": {
                 "goods": {
                     "title": "袜子",
@@ -634,7 +509,7 @@ def rgoods():
                     "mobile": "18918989110",
                     "address": "北京",
                 },
-                "orderid": orderID(),
+                "orderid": "113030330",
                 "created": "2017-02-01",
                 "fee": "550.00",
                 "discount": "300.00",
@@ -662,17 +537,9 @@ def init_db():
     db.commit()
 
 
-# 数据库操作
-# python three.py db migrate
-# python three.py db upgrade
-
-
-# if __name__ == '__main__':
-#     manager.run()
+rundebug = app.run(debug=True, host='0.0.0.0', port=3000)
 
 # 程序运行
-
-
 # server run
 
 

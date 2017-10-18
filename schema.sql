@@ -4,20 +4,11 @@ CREATE TABLE alembic_version (
 	version_num VARCHAR(32) NOT NULL, 
 	CONSTRAINT alembic_version_pkc PRIMARY KEY (version_num)
 );
+
 CREATE TABLE goods (
 	id INTEGER NOT NULL, 
 	g_name VARCHAR, 
 	g_price VARCHAR, 
-	PRIMARY KEY (id)
-);
-CREATE TABLE reqlog (
-	id INTEGER NOT NULL, 
-	req_id VARCHAR, 
-	datatime VARCHAR, 
-	cipher VARCHAR, 
-	clear VARCHAR, 
-	base VARCHAR, 
-	basejson VARCHAR, 
 	PRIMARY KEY (id)
 );
 CREATE TABLE sign (
@@ -33,6 +24,7 @@ CREATE TABLE sign (
 	UNIQUE (req_id), 
 	CHECK (is_ok IN (0, 1))
 );
+
 CREATE TABLE orders (
 	id INTEGER NOT NULL, 
 	order_num VARCHAR, 
@@ -57,7 +49,6 @@ CREATE TABLE status (
 	FOREIGN KEY(owner_id) REFERENCES sign (id)
 );
 CREATE INDEX ix_goods_id ON goods (id);
-CREATE INDEX ix_reqlog_id ON reqlog (id);
 CREATE INDEX ix_sign_id ON sign (id);
 CREATE INDEX ix_status_id ON status (id);
 COMMIT;
