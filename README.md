@@ -38,6 +38,8 @@
 
 #### 数据库操作
 ```
+<首次操作>
+
 1、初始化：
 $ python manage.py db init
 
@@ -46,6 +48,22 @@ $ Python manage.py db migrate
 
 3、更新数据库
 $ python manage.py db upgrde
+
+<后续操作>
+
+$ python manage.py db migrate -m 'log'
+
+$ python manage.py db upgrde
+
+```
+
+#### 数据库回滚
+```
+# 获取 History ID
+$ python manager.py db history
+
+# 回滚到某个 history
+$ python manager.py db downgrade <history_id>
 
 ```
 
