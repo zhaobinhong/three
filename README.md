@@ -73,6 +73,9 @@ $ python manager.py db downgrade <history_id>
 启动：
 $ Python manage.py runserver
 
+开发模式:
+$ python manage.py dev
+
 debug模式:
 $ python manage.py runserver --debug
 
