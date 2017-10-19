@@ -537,8 +537,6 @@ def init_db():
     db.commit()
 
 
-rundebug = app.run(debug=True, host='0.0.0.0', port=3000)
-
 # 程序运行
 # server run
 
@@ -549,5 +547,5 @@ rundebug = app.run(debug=True, host='0.0.0.0', port=3000)
 
 # test run
 
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=3000)
+# if __name__ == '__main__':
+#     app.run(debug=True, host='0.0.0.0', port=3000)
