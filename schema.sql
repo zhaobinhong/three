@@ -18,7 +18,7 @@ CREATE TABLE sign (
 	req_id VARCHAR, 
 	openid VARCHAR, 
 	appkey VARCHAR, 
-	is_ok BOOLEAN, 
+	is_ok BOOLEAN,
 	PRIMARY KEY (id), 
 	UNIQUE (openid), 
 	UNIQUE (req_id), 

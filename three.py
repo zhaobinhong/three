@@ -16,10 +16,16 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config.setdefault('SQLALCHEMY_TRACK_MODIFICATIONS', True)
 db = SQLAlchemy(app)
 
-
 # migrate = Migrate(app, db)
 # manager = Manager(app)
 # manager.add_command('db', MigrateCommand)
+
+
+# appkey 配置
+appkey = 'appkey'
+
+# 验签地址
+VERIFY_GATEWAY = 'http://10.7.7.22:9090'
 
 
 # 注册用户表
@@ -83,13 +89,6 @@ class Orders(db.Model):
     mobile = db.Column(db.String)
     # 商品状态
     g_type = db.Column(db.String)
-
-
-# appkey 配置
-appkey = 'appkey'
-
-# 验签地址
-VERIFY_GATEWAY = 'http://10.7.7.22:9090'
 
 
 # 推送回调
@@ -535,7 +534,6 @@ def init_db():
         db.cursor().executescript(f.read())
 
     db.commit()
-
 
 # 程序运行
 # server run
